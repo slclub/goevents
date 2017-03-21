@@ -2,29 +2,38 @@ package goevents
 
 import "sync"
 
+//Events interface who operate the events struct
+//On:bind event to the queue of events
+//GoOn:bind event to the queue and run run in gorountine
+//Emit all the event in the queue
 type Events interface {
 	On(on string, fn func(interface{}) error)
 	GoOn(on string, fn func(interface{}) error)
 	Emit()
+	//Can run the special event defined based on the first arguments
 	Trigger()
 }
 
+//goevents master struct
 type events struct {
 	*sync.RWMutex
-	// Event items queue
-	queue map[string][]eventItem
-	loop  []eventItem
+	//Structured event queue
+	queue map[string][]*eventItem
+	//Liner struct event queue
+	loop []*eventItem
 
 	// Temp arguments for the curruent event
 	curParam []interface{}
+	// Current event
 	curEvent *eventItem
 }
 
 //All the events instances
+//It is the entry
 func Classic() (this *events) {
 	this = new(events)
-	this.queue = make(map[string][]eventItem)
-	this.loop = make([]eventItem, 0)
+	this.queue = make(map[string][]*eventItem)
+	this.loop = make([]*eventItem, 0)
 	return
 }
 
@@ -43,15 +52,17 @@ func (this *events) On(name string, fn func(...interface{}), args ...interface{}
 	item.param = args
 
 	this.curEvent = item
-	this.queue[name] = append(this.queue[name], *item)
-	this.loop = append(this.loop, *item)
+	this.queue[name] = append(this.queue[name], item)
+	this.loop = append(this.loop, item)
 	this.curParam = make([]interface{}, 0)
 
 	return
 }
 
 /**
- *
+ * Bind param to the variable curparam
+ * Return events master struct
+ * It would be clear the variable curParam when invoke On function.
  */
 func (this *events) Bind(args ...interface{}) *events {
 	this.curParam = args
@@ -60,6 +71,7 @@ func (this *events) Bind(args ...interface{}) *events {
 
 /**
  * Tiigger events
+ * If the lenght of names bigger than one It will trigger the group events that named.
  */
 func (this *events) Trigger(names ...string) {
 
