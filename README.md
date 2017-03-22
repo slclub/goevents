@@ -8,8 +8,10 @@ Serial and parallel events supported.
 
 You can use them seperately. Also you can also mix using serial and parallel .
 
-
+####  ![简体中文](https://github.com/slclub/goevents/blob/master/doc/README.zh.md)
 ####  <a href="#api">API documents</a>
+
+- ![Classic](#classic)
 
 # Get code to your local development.
 
@@ -35,32 +37,32 @@ You can use them seperately. Also you can also mix using serial and parallel .
 
     //There is the function of event defined by yourself. 
     func event1(st ...interface{}) {
-      str := ""
-      for _, value := range st {
-        val, _ := value.(string)
-        str += string(val)
-      }
-      fmt.Println("event1 emit", str)
+        str := ""
+        for _, value := range st {
+            val, _ := value.(string)
+            str += string(val)
+        }
+        fmt.Println("event1 emit", str)
     }
     
     
 ## Example of serial events
 
     func main() {
-    ¦ //beego.Run()
+        //beego.Run()
 
-    ¦ var2 := "132342333322222222"
-    ¦ events := goevents.Classic()
+        var2 := "132342333322222222"
+        events := goevents.Classic()
 
-    ¦ events.Bind("123", "dfd").On("a", event1)
+        events.Bind("123", "dfd").On("a", event1)
 
-    ¦ evnets.Bind("e2","do some things")
-      events.On("b", event2)//event2 that you need to define by yourself
+        evnets.Bind("e2","do some things")
+        events.On("b", event2)//event2 that you need to define by yourself
 
-      //Can trigger the events that was named belong to On function.
-      //Events.Bind("e2", "do some things by bind").Trigger("b")
-      //Trigger all the event functions.
-      events.Emit()
+        //Can trigger the events that was named belong to On function.
+        //Events.Bind("e2", "do some things by bind").Trigger("b")
+        //Trigger all the event functions.
+        events.Emit()
     }
     
 ## Example of parallel event supported
@@ -82,64 +84,62 @@ You can use them seperately. Also you can also mix using serial and parallel .
     package main
 
     import (
-      "fmt"
-      //"github.com/astaxie/beego"
-      "github.com/slclub/goevents"
+        "fmt"
+        "github.com/slclub/goevents"
     )
 
     func event1(st ...interface{}) {
-      str := ""
-      for _, value := range st {
-        val, _ := value.(string)
-        str += string(val)
-      }
-      fmt.Println("event1 emit", str)
+        str := ""
+        for _, value := range st {
+            val, _ := value.(string)
+            str += string(val)
+        }
+        fmt.Println("event1 emit", str)
     }
 
     func event2(st ...interface{}) {
-      str := ""
-      for _, value := range st {
-        val, _ := value.(string)
-        str += string(val)
-      }
-      fmt.Println("event2 emit", str)
+        str := ""
+        for _, value := range st {
+            val, _ := value.(string)
+            str += string(val)
+        }
+        fmt.Println("event2 emit", str)
     }
 
     func coEvent1(st ...interface{}) {
-
-      str := ""
-      for _, value := range st {
-        val, _ := value.(string)
-        str += string(val)
-      }
-      fmt.Println("con event emit", str)
+        str := ""
+        for _, value := range st {
+            val, _ := value.(string)
+            str += string(val)
+        }
+        fmt.Println("con event emit", str)
     }
 
     func main() {
-      //beego.Run()
+        //beego.Run()
 
-      var2 := "132342333322222222"
-      events := goevents.Classic()
+        var2 := "132342333322222222"
+        events := goevents.Classic()
 
-      events.Bind("123", "dfd").On("a", event1)
-      events.On("b", event2)
+        events.Bind("123", "dfd").On("a", event1)
+        events.On("b", event2)
 
-      //Bind concurrent events
-      events.GoOn(coEvent1, "p1")
-      events.GoOn(coEvent1, "p2")
-      events.GoOn(coEvent1, "p3")
-      events.GoOn(coEvent1, "p4")
-      events.GoOn(coEvent1, "p5")
+        //Bind concurrent events
+        events.GoOn(coEvent1, "p1")
+        events.GoOn(coEvent1, "p2")
+        events.GoOn(coEvent1, "p3")
+        events.GoOn(coEvent1, "p4")
+        events.GoOn(coEvent1, "p5")
 
-      events.Bind(var2).Trigger("b")
+        events.Bind(var2).Trigger("b")
 
-      //Emit all
-      events.Emit()
+        //Emit all
+        events.Emit()
     }
 
 # <a name="api">API document</a>
 
-### events.Classic()
+### <a name="classic" >[events.Classic()]</a>
 
     //instance
     ev := events.Classic()
