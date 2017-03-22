@@ -9,7 +9,7 @@ Serial and parallel events supported.
 You can use them seperately. Also you can also mix using serial and parallel .
 
 
-####  <a href="https://github.com/slclub/goevents#api">API documents</a>
+####  <a href="#api">API documents</a>
 
 # Get code to your local development.
 
