@@ -2,9 +2,14 @@
 
 # Event description
 
-Event loop
+Event loop.
 
 Serial and parallel events supported.
+
+You can use them seperately. Also you can also mix using serial and parallel .
+
+
+####  <a href="https://github.com/slclub/goevents#api">API documents</a>
 
 # Get code to your local development.
 
@@ -131,3 +136,55 @@ Serial and parallel events supported.
       //Emit all
       events.Emit()
     }
+
+# <a name="api">API document</a>
+
+### events.Classic()
+
+    //instance
+    ev := events.Classic()
+    
+### .On(name string, fn func(...interface{}))
+
+Bind event to the object of events
+
+    ev.On("message", func(args ...interface{}){
+        //do some things
+    })
+
+### .Bind(args ...interface{})*events
+
+Bind param to the current event func
+
+    //use mod one
+    ev.Bind("abc",123,&struct1{1,2})
+    
+    //you can also coherent usage.
+    ev.Bind(...).On("message", func(args ...interface{}){
+        //do something
+    })
+
+### .Trigger(args ...string)
+
+Trigger the events by the first element of the args. it will Emit all events if no argments.
+    
+    //Just trigger partion of the events by first argment.
+    ev.Trigger("message")
+    //If no params it will emit all the serial events 
+    ev.Trigger()
+
+### .GoOn(fn func(...interface{}), args ...interface{})
+
+Bind event that need to parallel execution.
+    
+    ev.GoOn(func(...interface{}){
+        //event do something
+    }, args)
+    
+    
+### .Emit()
+
+Emit all the events.
+Parallel events execution included.
+    
+    ev.Emit().
