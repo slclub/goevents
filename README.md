@@ -31,7 +31,7 @@ You can use them seperately. Also you can also mix using serial and parallel .
 
 ## Defined your self event func
 
-
+```
     //defined func follow the type.It is the beanchmark,don't need to appear in your code
     type func(...interface{})
 
@@ -44,6 +44,7 @@ You can use them seperately. Also you can also mix using serial and parallel .
         }
         fmt.Println("event1 emit", str)
     }
+```
     
     
 ## Example of serial events
@@ -57,10 +58,13 @@ You can use them seperately. Also you can also mix using serial and parallel .
         events.Bind("123", "dfd").On("a", event1)
 
         evnets.Bind("e2","do some things")
-        events.On("b", event2)//event2 that you need to define by yourself
+        events.On("b", event2:=func(...interface{}){
+            //event2 that you need to define by yourself
+        })
 
         //Can trigger the events that was named belong to On function.
-        //Events.Bind("e2", "do some things by bind").Trigger("b")
+        //events.Bind("e2", "do some things by bind").Trigger("b")
+        
         //Trigger all the event functions.
         events.Emit()
     }
