@@ -8,8 +8,8 @@ Serial and parallel events supported.
 
 You can use them seperately. Also you can also mix using serial and parallel .
 
-####  ![简体中文](https://github.com/slclub/goevents/blob/master/doc/README.zh.md)
-####  <a href="#api">API documents</a>
+####  [简体中文](https://github.com/slclub/goevents/blob/master/doc/README.zh.md)
+####  <a href="https://github.com/slclub/goevents#api">API documents</a>
 
 - ![Classic](#classic)
 
