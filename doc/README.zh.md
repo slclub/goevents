@@ -7,7 +7,7 @@
 可以灵活的绑定事件队列的参数。针对事件去绑定，或者，统一触发事件之前去绑定，或者混合着使用。单个绑定的优先级会更高一些
 
 ###  <a href="#api">API</a>
-###  ![English Doc](/slclub/goevents)
+###  ![English Doc](https://github.com/slclub/goevents)
 
 # 获取代码到本地
 
