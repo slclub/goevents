@@ -11,7 +11,7 @@ You can use them seperately. Also you can also mix using serial and parallel .
 ####  [简体中文](https://github.com/slclub/goevents/blob/master/doc/README.zh.md)
 ####  <a href="https://github.com/slclub/goevents#api">API documents</a>
 
-- ![Classic](#classic)
+- <a href="#classic">[Classic]</a>
 
 # Get code to your local development.
 
