@@ -31,7 +31,8 @@ type channelManager struct {
 
 func NewConcurrent() *concurrent {
 	loop := make([]*eventItem, 0)
-	return &concurrent{NewChannelManager(), loop, true, nil}
+	endFn := NewEvent()
+	return &concurrent{NewChannelManager(), loop, true, endFn}
 }
 
 func NewChannelManager() *channelManager {
@@ -69,6 +70,7 @@ func (this *concurrent) wait() {
 	}
 }
 
+//Add the last event function called.
 func (this *concurrent) end(fn func(args ...interface{}), args ...interface{}) {
 	if fn == nil {
 		return
@@ -92,6 +94,13 @@ func (this *concurrent) emit() error {
 
 	if this.waited {
 		this.wait()
+	}
+
+	params := this.endFn.param
+	if len(params) == 0 {
+		this.endFn.fn()
+	} else {
+		this.endFn.fn(params...)
 	}
 
 	return nil

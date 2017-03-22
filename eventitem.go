@@ -13,15 +13,15 @@ type eventItem struct {
 	name  string
 	fn    func(...interface{})
 	param []interface{}
-	//Does the event need to be run in a new goroutine
-	paralled bool
 	//Whether the event has run
 	emited bool
 }
 
 //Create a new event
 func NewEvent() *eventItem {
-	return &eventItem{}
+	fn := func(args ...interface{}) {}
+	param := make([]interface{}, 0)
+	return &eventItem{"", fn, param, false}
 }
 
 //Excute the current event

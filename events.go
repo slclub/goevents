@@ -2,6 +2,8 @@ package goevents
 
 import "sync"
 
+type EventFunc func(...interface{}) error
+
 //Events interface who operate the events struct
 //On:bind event to the queue of events
 //GoOn:bind event to the queue and run run in gorountine
@@ -113,4 +115,8 @@ func (this *events) GoOn(fn func(args ...interface{}), args ...interface{}) erro
 	this.curParam = args
 	this.concurrent.on(fn, args...)
 	return nil
+}
+
+func (this *events) End(fn func(args ...interface{}), args ...interface{}) {
+	this.concurrent.end(fn, args...)
 }
