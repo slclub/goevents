@@ -7,8 +7,8 @@ import "sync"
 //GoOn:bind event to the queue and run run in gorountine
 //Emit all the event in the queue
 type Events interface {
-	On(on string, fn func(interface{}) error)
-	GoOn(on string, fn func(interface{}) error)
+	On(on string, fn func(...interface{}) error)
+	GoOn(fn func(...interface{}) error, args ...interface{})
 	Emit()
 	//Can run the special event defined based on the first arguments
 	Trigger()
@@ -26,6 +26,10 @@ type events struct {
 	curParam []interface{}
 	// Current event
 	curEvent *eventItem
+	//eventsModule is running the evnets that added by devoloper
+	running bool
+	//concurrent running object
+	concurrent *concurrent
 }
 
 //All the events instances
@@ -34,11 +38,16 @@ func Classic() (this *events) {
 	this = new(events)
 	this.queue = make(map[string][]*eventItem)
 	this.loop = make([]*eventItem, 0)
+	this.concurrent = NewConcurrent()
+	this.running = false
 	return
 }
 
 //Bind event to the attribute queue of events struct
 func (this *events) On(name string, fn func(...interface{}), args ...interface{}) {
+	if fn == nil {
+		return
+	}
 	item := NewEvent()
 	item.fn = fn
 
@@ -84,6 +93,7 @@ func (this *events) Trigger(names ...string) {
 		loop = this.queue[names[0]]
 	}
 
+	this.running = true
 	for _, e := range loop {
 		param := e.param
 		if len(param) == 0 {
@@ -96,7 +106,11 @@ func (this *events) Trigger(names ...string) {
 // Trigger all the events
 func (this *events) Emit() {
 	this.Trigger()
+	this.concurrent.emit()
 }
 
-func (this *events) GoOn() {
+func (this *events) GoOn(fn func(args ...interface{}), args ...interface{}) error {
+	this.curParam = args
+	this.concurrent.on(fn, args...)
+	return nil
 }
