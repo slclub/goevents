@@ -1,11 +1,6 @@
 package goevents
 
-//import "fmt"
-
-const (
-	//Default concurrented numbers of channels
-	defaultChannelNumber = 10
-)
+import "fmt"
 
 type Concurrent interface {
 	gofunc(args ...interface{})
@@ -29,15 +24,17 @@ type channelManager struct {
 	ch       chan int
 }
 
-func NewConcurrent() *concurrent {
+var p = fmt.Println
+
+func NewConcurrent(chNum int) *concurrent {
 	loop := make([]*eventItem, 0)
 	endFn := NewEvent()
-	return &concurrent{NewChannelManager(), loop, true, endFn}
+	return &concurrent{NewChannelManager(chNum), loop, true, endFn}
 }
 
-func NewChannelManager() *channelManager {
-	ch := make(chan int, defaultChannelNumber)
-	return &channelManager{defaultChannelNumber, ch}
+func NewChannelManager(chNum int) *channelManager {
+	ch := make(chan int, chNum)
+	return &channelManager{chNum, ch}
 }
 
 //bind event to concurrent queue.
@@ -87,6 +84,7 @@ func (this *concurrent) emit() error {
 		return nil
 	}
 
+	//invoke the events that was in the queue
 	for _, e := range this.loop {
 		param := e.param
 		go this.gofunc(e.fn, param...)
@@ -96,6 +94,9 @@ func (this *concurrent) emit() error {
 		this.wait()
 	}
 
+	//p(this.chNumber)
+
+	//running the last event
 	params := this.endFn.param
 	if len(params) == 0 {
 		this.endFn.fn()

@@ -6,14 +6,20 @@ type EventFunc func(...interface{}) error
 
 //Events interface who operate the events struct
 //On:bind event to the queue of events
-//GoOn:bind event to the queue and run run in gorountine
 //Emit all the event in the queue
 type Events interface {
 	On(on string, fn func(...interface{}) error)
-	GoOn(fn func(...interface{}) error, args ...interface{})
 	Emit()
 	//Can run the special event defined based on the first arguments
 	Trigger()
+}
+
+//Open parallel interface
+//GoOn:bind event to the queue and run run in gorountine
+//End:bind the last event
+type EventsConcurrent interface {
+	GoOn(fn func(...interface{}) error, args ...interface{})
+	End(fn func(...interface{}), args ...interface{})
 }
 
 //goevents master struct
@@ -32,6 +38,7 @@ type events struct {
 	running bool
 	//concurrent running object
 	concurrent *concurrent
+	config     *config
 }
 
 //All the events instances
@@ -40,8 +47,9 @@ func Classic() (this *events) {
 	this = new(events)
 	this.queue = make(map[string][]*eventItem)
 	this.loop = make([]*eventItem, 0)
-	this.concurrent = NewConcurrent()
 	this.running = false
+	this.config = newConf(0, 0, false)
+	this.concurrent = NewConcurrent(this.config.chNumber)
 	return
 }
 
@@ -111,12 +119,14 @@ func (this *events) Emit() {
 	this.concurrent.emit()
 }
 
+// Add concurrent event
 func (this *events) GoOn(fn func(args ...interface{}), args ...interface{}) error {
 	this.curParam = args
 	this.concurrent.on(fn, args...)
 	return nil
 }
 
+// Add the last event
 func (this *events) End(fn func(args ...interface{}), args ...interface{}) {
 	this.concurrent.end(fn, args...)
 }
