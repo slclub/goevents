@@ -60,4 +60,75 @@
         events.Emit()
     }
 
-# ![API 文档说明](#api)
+
+# <a href="#api">API document</a>
+
+### [events.Classic()]
+
+    //instance
+    ev := events.Classic()
+    
+### .On(name string, fn func(...interface{}))
+
+绑定事件到events对象上
+
+    ev.On("message", func(args ...interface{}){
+        //do some things
+    })
+
+### .Bind(args ...interface{})*events
+
+- 绑定事件参数
+- 返回goevents对象
+```
+    //绑定到当前事件上
+    ev.Bind("abc",123,&struct1{1,2})
+    
+    //绑定事件返回的goevents对象 所以可以连贯的写法.
+    ev.Bind(...).On("message", func(args ...interface{}){
+        //do something
+    })
+```
+
+### .Trigger(args ...string)
+
+- 触发事件.
+- 可以按照第一个参数为模块 来触发此模块的事件
+- 不传参数 触发所有串行执行的事件
+
+```
+
+    //Just trigger partion of the events by first argment.
+    ev.Trigger("message")
+    //If no params it will emit all the serial events 
+    ev.Trigger()
+```    
+    
+### .GoOn(fn func(...interface{}), args ...interface{})
+
+- 绑定事件到并行执行的事件上.
+```
+    ev.GoOn(func(...interface{}){
+        //event do something
+    }, args)
+```    
+
+### .Emit()
+
+触发所有的事件 并行和串行的 全部会执行.
+
+    ev.Emit().
+
+### .Conf(chNum int, safeMod int)
+
+设置goevents对象的method 每个对象只能设置一次 goevents.Classic() 之后马上执行.
+
+不设置也可以非必选
+    
+    ev.Conf(3,0)
+
+### .End(func(...interface{}), args ...interface{})
+
+最后执行的事件多 与并行执行事件结合使用
+
+more 
