@@ -159,7 +159,7 @@ Bind event to the object of events
 ### .Bind(args ...interface{})*events
 
 Bind param to the current event func
-
+```
     //use mod one
     ev.Bind("abc",123,&struct1{1,2})
     
@@ -167,6 +167,7 @@ Bind param to the current event func
     ev.Bind(...).On("message", func(args ...interface{}){
         //do something
     })
+```    
 
 ### .Trigger(args ...string)
 
@@ -192,3 +193,13 @@ Emit all the events.
 Parallel events execution included.
     
     ev.Emit().
+
+### .Conf(chNum int, safeMod int)
+
+Setting events object running mod.
+Param:chNum parallel gorountine numbers.
+Param:safeMod events object running mod.
+
+    ev.Conf(3,0)
+    
+more contact with slclub
