@@ -85,6 +85,7 @@ func (this *events) On(name string, fn func(...interface{}), args ...interface{}
  */
 func (this *events) Bind(args ...interface{}) *events {
 	this.curParam = args
+	this.concurrent.currentParam = args
 	return this
 }
 

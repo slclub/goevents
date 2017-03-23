@@ -14,8 +14,9 @@ type concurrent struct {
 	//Concurrent events queue
 	loop []*eventItem
 	//need wait gorountine
-	waited bool
-	endFn  *eventItem
+	waited       bool
+	endFn        *eventItem
+	currentParam []interface{}
 }
 
 //
@@ -29,7 +30,8 @@ var p = fmt.Println
 func NewConcurrent(chNum int) *concurrent {
 	loop := make([]*eventItem, 0)
 	endFn := NewEvent()
-	return &concurrent{NewChannelManager(chNum), loop, true, endFn}
+	cur := make([]interface{}, 0)
+	return &concurrent{NewChannelManager(chNum), loop, true, endFn, cur}
 }
 
 func NewChannelManager(chNum int) *channelManager {
@@ -49,12 +51,20 @@ func (this *concurrent) on(fn func(args ...interface{}), args ...interface{}) *c
 	item.param = args
 
 	this.loop = append(this.loop, item)
+	this.currentParam = args
 	return this
 }
 
 //Concurrent run the events that has been defined
 func (this *concurrent) gofunc(fn func(args ...interface{}), args ...interface{}) {
+
+	//Set argument by current param If lenght of args equal zero.
+	if len(args) == 0 {
+		args = this.currentParam
+	}
+
 	fn(args...)
+
 	this.ch <- 1
 }
 
