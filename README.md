@@ -35,11 +35,13 @@ You can use them seperately. Also you can also mix using serial and parallel .
     //defined func follow the type.It is the beanchmark,don't need to appear in your code
     Define functions "func" rather than method according to golang standards
 
-    //There is the function of event defined by yourself. 
+    //There is the function of event defined by yourself. The following definitions are allowed.Maybe you can say that as long as the golang function is allowed
     
     func event1(st ...interface{}) { }//allowed
    
     func event(){}//allowed.
+    
+    func event(n int, str string){}//allowed.
     
 ```
     
