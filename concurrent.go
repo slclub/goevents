@@ -1,11 +1,11 @@
 package goevents
 
-import "fmt"
+import "reflect"
 
 type Concurrent interface {
-	gofunc(args ...interface{})
+	gofunc(args ...Arguments)
 	wait()
-	end(fn func(args ...interface{}), args ...interface{})
+	end(fn EventFunc, args ...Arguments)
 	emit()
 }
 
@@ -16,7 +16,7 @@ type concurrent struct {
 	//need wait gorountine
 	waited       bool
 	endFn        *eventItem
-	currentParam []interface{}
+	currentParam []Arguments
 }
 
 //
@@ -25,12 +25,10 @@ type channelManager struct {
 	ch       chan int
 }
 
-var p = fmt.Println
-
 func NewConcurrent(chNum int) *concurrent {
 	loop := make([]*eventItem, 0)
-	endFn := NewEvent()
-	cur := make([]interface{}, 0)
+	cur := make([]Arguments, 0)
+	endFn := NewEvent(initFn, cur)
 	return &concurrent{NewChannelManager(chNum), loop, true, endFn, cur}
 }
 
@@ -40,15 +38,12 @@ func NewChannelManager(chNum int) *channelManager {
 }
 
 //bind event to concurrent queue.
-func (this *concurrent) on(fn func(args ...interface{}), args ...interface{}) *concurrent {
+func (this *concurrent) on(fn EventFunc, args ...Arguments) *concurrent {
 	if fn == nil {
 		return this
 	}
 
-	item := NewEvent()
-	item.fn = fn
-
-	item.param = args
+	item := NewEvent(fn, args)
 
 	this.loop = append(this.loop, item)
 	this.currentParam = args
@@ -56,14 +51,14 @@ func (this *concurrent) on(fn func(args ...interface{}), args ...interface{}) *c
 }
 
 //Concurrent run the events that has been defined
-func (this *concurrent) gofunc(fn func(args ...interface{}), args ...interface{}) {
+func (this *concurrent) gofunc(item *eventItem) {
 
 	//Set argument by current param If lenght of args equal zero.
-	if len(args) == 0 {
-		args = this.currentParam
+	if len(item.param) == 0 {
+		item.param = this.currentParam
 	}
-
-	fn(args...)
+	argvs := getArgs(item.param...)
+	reflect.ValueOf(item.fn).Call(argvs[:item.len])
 
 	this.ch <- 1
 }
@@ -78,7 +73,7 @@ func (this *concurrent) wait() {
 }
 
 //Add the last event function called.
-func (this *concurrent) end(fn func(args ...interface{}), args ...interface{}) {
+func (this *concurrent) end(fn EventFunc, args ...Arguments) {
 	if fn == nil {
 		return
 	}
@@ -96,8 +91,7 @@ func (this *concurrent) emit() error {
 
 	//invoke the events that was in the queue
 	for _, e := range this.loop {
-		param := e.param
-		go this.gofunc(e.fn, param...)
+		go this.gofunc(e)
 	}
 
 	if this.waited {
@@ -108,10 +102,15 @@ func (this *concurrent) emit() error {
 
 	//running the last event
 	params := this.endFn.param
+
+	fn, ok := this.endFn.fn.(eventFunc)
+	if !ok {
+		return nil
+	}
 	if len(params) == 0 {
-		this.endFn.fn()
+		fn()
 	} else {
-		this.endFn.fn(params...)
+		fn(params...)
 	}
 
 	return nil

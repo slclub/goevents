@@ -1,8 +1,10 @@
 package goevents
 
+import "reflect"
+
 //Event interface
 type EventItem interface {
-	exec(args ...interface{})
+	exec(args ...Arguments)
 }
 
 type Event interface {
@@ -10,25 +12,38 @@ type Event interface {
 
 //The struct of event
 type eventItem struct {
-	name  string
-	fn    func(...interface{})
-	param []interface{}
+	fn    EventFunc
+	param []Arguments
 	//Whether the event has run
 	emited bool
+	len    int
 }
 
 //Create a new event
-func NewEvent() *eventItem {
-	fn := func(args ...interface{}) {}
-	param := make([]interface{}, 0)
-	return &eventItem{"", fn, param, false}
+func NewEvent(fn EventFunc, param []Arguments) *eventItem {
+	l := len(param)
+	return &eventItem{fn, param, false, l}
 }
 
 //Excute the current event
-func (this *eventItem) exec(args ...interface{}) {
+func (this *eventItem) exec(args ...Arguments) {
 	if this.emited {
 		return
 	}
-	this.fn(args...)
+	argvs := getArgs(args...)
+	reflect.ValueOf(this.fn).Call(argvs[:this.len])
 	this.emited = true
+}
+
+//Convert  type of ...Arguments to reflect.Value slice type
+func getArgs(args ...Arguments) []reflect.Value {
+	var ma = make([]reflect.Value, len(args))
+	for k, v := range args {
+		ma[k] = reflect.ValueOf(v)
+	}
+	return ma
+}
+
+//Init function
+func initFn() {
 }

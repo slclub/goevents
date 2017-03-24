@@ -1,16 +1,22 @@
 package goevents
 
 import "sync"
+import "fmt"
 
-type EventFunc func(...interface{}) error
+var print = fmt.Println
+
+type Arguments interface{}
+
+type eventFunc func(args ...Arguments)
+type EventFunc interface{}
 
 //Events interface who operate the events struct
 //On:bind event to the queue of events
 //Emit all the event in the queue
 type Events interface {
-	On(on string, fn func(...interface{}) error)
+	On(on string, fn func(...Arguments) error)
 	Emit()
-	//Can run the special event defined based on the first arguments
+	//Can run the special event defined based on the first Arguments
 	Trigger()
 }
 
@@ -18,8 +24,8 @@ type Events interface {
 //GoOn:bind event to the queue and run run in gorountine
 //End:bind the last event
 type EventsConcurrent interface {
-	GoOn(fn func(...interface{}) error, args ...interface{})
-	End(fn func(...interface{}), args ...interface{})
+	GoOn(fn EventFunc, args ...Arguments)
+	End(fn EventFunc, args ...Arguments)
 }
 
 //goevents master struct
@@ -30,8 +36,8 @@ type events struct {
 	//Liner struct event queue
 	loop []*eventItem
 
-	// Temp arguments for the curruent event
-	curParam []interface{}
+	// Temp Arguments for the curruent event
+	curParam []Arguments
 	// Current event
 	curEvent *eventItem
 	//eventsModule is running the evnets that added by devoloper
@@ -54,12 +60,10 @@ func Classic() (this *events) {
 }
 
 //Bind event to the attribute queue of events struct
-func (this *events) On(name string, fn func(...interface{}), args ...interface{}) {
+func (this *events) On(name string, fn EventFunc, args ...Arguments) {
 	if fn == nil {
 		return
 	}
-	item := NewEvent()
-	item.fn = fn
 
 	if len(name) == 0 {
 		name = "all"
@@ -68,12 +72,11 @@ func (this *events) On(name string, fn func(...interface{}), args ...interface{}
 	if len(args) == 0 {
 		args = this.curParam
 	}
-	item.param = args
-
+	item := NewEvent(fn, args)
 	this.curEvent = item
 	this.queue[name] = append(this.queue[name], item)
 	this.loop = append(this.loop, item)
-	this.curParam = make([]interface{}, 0)
+	this.curParam = make([]Arguments, 0)
 
 	return
 }
@@ -83,7 +86,7 @@ func (this *events) On(name string, fn func(...interface{}), args ...interface{}
  * Return events master struct
  * It would be clear the variable curParam when invoke On function.
  */
-func (this *events) Bind(args ...interface{}) *events {
+func (this *events) Bind(args ...Arguments) *events {
 	this.curParam = args
 	this.concurrent.currentParam = args
 	return this
@@ -121,13 +124,13 @@ func (this *events) Emit() {
 }
 
 // Add concurrent event
-func (this *events) GoOn(fn func(args ...interface{}), args ...interface{}) error {
+func (this *events) GoOn(fn EventFunc, args ...Arguments) error {
 	this.curParam = args
 	this.concurrent.on(fn, args...)
 	return nil
 }
 
 // Add the last event
-func (this *events) End(fn func(args ...interface{}), args ...interface{}) {
+func (this *events) End(fn EventFunc, args ...Arguments) {
 	this.concurrent.end(fn, args...)
 }
