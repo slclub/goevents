@@ -1,3 +1,10 @@
+// Copyright 2017 The Go Authors.  All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+// This package provides an event mechanism that you can use in any project:
+// The event function defined Can be adapted to any custom function as an event function
+// Detail:[https://github.com/slclub/goevents]
 package goevents
 
 import (
