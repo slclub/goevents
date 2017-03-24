@@ -31,35 +31,40 @@ You can use them seperately. Also you can also mix using serial and parallel .
 
 ## Defined your self event func
 
-```
-    //defined func follow the type.It is the beanchmark,don't need to appear in your code
-    type func(...interface{})
 
-    //There is the function of event defined by yourself. 
-    func event1(st ...interface{}) {
-        str := ""
-        for _, value := range st {
-            val, _ := value.(string)
-            str += string(val)
-        }
-        fmt.Println("event1 emit", str)
-    }
+Defined func follow the type.It is the beanchmark,don't need to appear in your code.
+Define functions "func" rather than method according to golang standards
+
+There is the function of event defined by yourself. The following definitions are allowed.Maybe you can say that as long as the golang function is allowed
+
+```
+
+    func event1(st ...interface{}) { }//allowed
+   
+    func event(){}//allowed.
+    
+    func event(n int, str string){}//allowed.
+    
 ```
     
     
 ## Example of serial events
 
     func main() {
-        //beego.Run()
 
-        var2 := "132342333322222222"
-        events := goevents.Classic()
+        self := goevents.Classic()
 
-        events.Bind("123", "dfd").On("a", event1)
+        self.On("a", func() {
+        print("serial event added:e1")
+        })
 
-        evnets.Bind("e2","do some things")
-        events.On("b", event2:=func(...interface{}){
-            //event2 that you need to define by yourself
+        self.On("b", func(n int) {
+        print("serial event added:e2; args:", n)
+        })
+        self.Bind(22222)
+
+        self.Bind("I am string").On("b", func(str string) {
+        print("serial event added:e3; args:", str)
         })
 
         //Can trigger the events that was named belong to On function.
@@ -71,74 +76,62 @@ You can use them seperately. Also you can also mix using serial and parallel .
     
 ## Example of parallel event supported
 
-      events.GoOn(coEvent1, "p1")
-      events.GoOn(coEvent1, "p2")
-      events.GoOn(coEvent1, "p3")
-      events.GoOn(coEvent1, "p4")
-      events.GoOn(coEvent1, "p5")
+    func main() {
 
-      //First trigger the events named by B
-      events.Bind(var2).Trigger("b")
+        self := goevents.Classic()
+        self.GoOn(func() {
+        print("parallel event added e1")
+        }, "no", 1)
 
-      //trigger all of the events that has not been emited.
-      events.Emit()
+        self.GoOn(func(str string, n int) {
+        print("parallel event added e2", str, n)
+        }, "no", 2)
 
-## Example mutil
+        self.Emit()
+
+        //trigger all of the events that has not been emited.
+        self.Emit()
+
+## Example of complex use case
 
     package main
 
     import (
         "fmt"
         "github.com/slclub/goevents"
+        "time"
     )
 
-    func event1(st ...interface{}) {
-        str := ""
-        for _, value := range st {
-            val, _ := value.(string)
-            str += string(val)
-        }
-        fmt.Println("event1 emit", str)
-    }
+    var print = fmt.Println
 
-    func event2(st ...interface{}) {
-        str := ""
-        for _, value := range st {
-            val, _ := value.(string)
-            str += string(val)
-        }
-        fmt.Println("event2 emit", str)
-    }
+    func Test() {
+        Timer := time.Now()
+        self := goevents.Classic()
 
-    func coEvent1(st ...interface{}) {
-        str := ""
-        for _, value := range st {
-            val, _ := value.(string)
-            str += string(val)
-        }
-        fmt.Println("con event emit", str)
-    }
+        self.On("a", func() {
+            print("serial event added:e1")
+        })
 
-    func main() {
-        //beego.Run()
+        self.On("b", func(n int) {
+            print("serial event added:e2; args:", n)
+        })
+        self.Bind(22222)
 
-        var2 := "132342333322222222"
-        events := goevents.Classic()
+        self.Bind("I am string").On("b", func(str string) {
+            print("serial event added:e3; args:", str)
+        })
 
-        events.Bind("123", "dfd").On("a", event1)
-        events.On("b", event2)
+        self.GoOn(func() {
+            print("parallel event added e1")
+        }, "no", 1)
 
-        //Bind concurrent events
-        events.GoOn(coEvent1, "p1")
-        events.GoOn(coEvent1, "p2")
-        events.GoOn(coEvent1, "p3")
-        events.GoOn(coEvent1, "p4")
-        events.GoOn(coEvent1, "p5")
+        self.GoOn(func(str string, n int) {
+            print("parallel event added e2", str, n)
+        }, "no", 2)
 
-        events.Bind(var2).Trigger("b")
-
-        //Emit all
-        events.Emit()
+        self.Emit()
+        excuTimes := time.Since(Timer)
+        print("event running time:", excuTimes)
     }
 
 # <a name="api">API document</a>
