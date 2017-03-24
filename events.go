@@ -1,7 +1,10 @@
 package goevents
 
-import "sync"
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"sync"
+)
 
 var print = fmt.Println
 
@@ -31,8 +34,6 @@ type EventsConcurrent interface {
 //goevents master struct
 type events struct {
 	*sync.RWMutex
-	//Structured event queue
-	queue map[string][]*eventItem
 	//Liner struct event queue
 	loop []*eventItem
 
@@ -51,7 +52,6 @@ type events struct {
 //It is the entry
 func Classic() (this *events) {
 	this = new(events)
-	this.queue = make(map[string][]*eventItem)
 	this.loop = make([]*eventItem, 0)
 	this.running = false
 	this.config = newConf(0, 0, false)
@@ -74,7 +74,6 @@ func (this *events) On(name string, fn EventFunc, args ...Arguments) {
 	}
 	item := NewEvent(fn, args)
 	this.curEvent = item
-	this.queue[name] = append(this.queue[name], item)
 	this.loop = append(this.loop, item)
 	this.curParam = make([]Arguments, 0)
 
@@ -89,6 +88,17 @@ func (this *events) On(name string, fn EventFunc, args ...Arguments) {
 func (this *events) Bind(args ...Arguments) *events {
 	this.curParam = args
 	this.concurrent.currentParam = args
+
+	last, ok := getSlicePop(this.loop)
+	if len(last.param) == 0 && ok == nil {
+		last.param = args
+	}
+
+	last, _ = getSlicePop(this.concurrent.loop)
+	if len(last.param) == 0 && ok == nil {
+		last.param = args
+	}
+
 	return this
 }
 
@@ -98,17 +108,11 @@ func (this *events) Bind(args ...Arguments) *events {
  */
 func (this *events) Trigger(names ...string) {
 
-	if len(names) > 0 && len(this.queue[names[0]]) == 0 {
-		return
-	}
-
 	loop := this.loop
-	if len(names) > 0 && len(this.queue[names[0]]) > 0 {
-		loop = this.queue[names[0]]
-	}
 
 	this.running = true
 	for _, e := range loop {
+		print(e.param)
 		param := e.param
 		if len(param) == 0 {
 			param = this.curParam
@@ -133,4 +137,12 @@ func (this *events) GoOn(fn EventFunc, args ...Arguments) error {
 // Add the last event
 func (this *events) End(fn EventFunc, args ...Arguments) {
 	this.concurrent.end(fn, args...)
+}
+
+func getSlicePop(si []*eventItem) (*eventItem, error) {
+	l := len(si)
+	if l == 0 {
+		return &eventItem{}, errors.New("not fonud eventItem")
+	}
+	return si[l-1], nil
 }

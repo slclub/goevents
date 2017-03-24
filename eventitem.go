@@ -21,7 +21,7 @@ type eventItem struct {
 
 //Create a new event
 func NewEvent(fn EventFunc, param []Arguments) *eventItem {
-	l := len(param)
+	l := reflect.TypeOf(fn).NumIn()
 	return &eventItem{fn, param, false, l}
 }
 
@@ -31,7 +31,10 @@ func (this *eventItem) exec(args ...Arguments) {
 		return
 	}
 	argvs := getArgs(args...)
-	reflect.ValueOf(this.fn).Call(argvs[:this.len])
+	if len(argvs) > this.len {
+		argvs = argvs[:this.len]
+	}
+	reflect.ValueOf(this.fn).Call(argvs)
 	this.emited = true
 }
 
