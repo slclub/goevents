@@ -92,7 +92,7 @@ There is the function of event defined by yourself. The following definitions ar
         //trigger all of the events that has not been emited.
         self.Emit()
 
-## Example mutil
+## Example of complex use case
 
     package main
 
